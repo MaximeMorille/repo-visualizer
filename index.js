@@ -20606,32 +20606,34 @@ var main = async () => {
   const outputFile = core.getInput("output_file") || "./diagram.svg";
   await import_fs2.default.writeFileSync(outputFile, componentCodeString);
   let doesBranchExist = true;
-  if (branch) {
-    await (0, import_exec.exec)("git", ["fetch"]);
-    try {
-      await (0, import_exec.exec)("git", ["rev-parse", "--verify", branch]);
-      await (0, import_exec.exec)("git", ["checkout", branch]);
-    } catch {
-      doesBranchExist = false;
-      core.info(`Branch ${branch} does not yet exist, creating ${branch}.`);
-      await (0, import_exec.exec)("git", ["checkout", "-b", branch]);
+  if (commitDiagram) {
+    if (branch) {
+      await (0, import_exec.exec)("git", ["fetch"]);
+      try {
+        await (0, import_exec.exec)("git", ["rev-parse", "--verify", branch]);
+        await (0, import_exec.exec)("git", ["checkout", branch]);
+      } catch {
+        doesBranchExist = false;
+        core.info(`Branch ${branch} does not yet exist, creating ${branch}.`);
+        await (0, import_exec.exec)("git", ["checkout", "-b", branch]);
+      }
     }
-  }
-  await (0, import_exec.exec)("git", ["add", outputFile]);
-  const diff = await execWithOutput("git", ["status", "--porcelain", outputFile]);
-  core.info(`diff: ${diff}`);
-  if (!diff) {
-    core.info("[INFO] No changes to the repo detected, exiting");
-    return;
-  }
-  await (0, import_exec.exec)("git", ["commit", "-m", commitMessage]);
-  if (doesBranchExist) {
-    await (0, import_exec.exec)("git", ["push"]);
-  } else {
-    await (0, import_exec.exec)("git", ["push", "--set-upstream", "origin", branch]);
-  }
-  if (branch) {
-    await (0, import_exec.exec)("git", "checkout", "-");
+    await (0, import_exec.exec)("git", ["add", outputFile]);
+    const diff = await execWithOutput("git", ["status", "--porcelain", outputFile]);
+    core.info(`diff: ${diff}`);
+    if (!diff) {
+      core.info("[INFO] No changes to the repo detected, exiting");
+      return;
+    }
+    await (0, import_exec.exec)("git", ["commit", "-m", commitMessage]);
+    if (doesBranchExist) {
+      await (0, import_exec.exec)("git", ["push"]);
+    } else {
+      await (0, import_exec.exec)("git", ["push", "--set-upstream", "origin", branch]);
+    }
+    if (branch) {
+      await (0, import_exec.exec)("git", "checkout", "-");
+    }
   }
   console.log("All set!");
 };

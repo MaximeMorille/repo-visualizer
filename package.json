@@ -1,4 +1,8 @@
 {
+  "name": "repo-visualizer",
+  "version": "0.1.0",
+  "main": "index.js",
+  "files": ["index.js"],
   "scripts": {
     "build": "node_modules/.bin/esbuild --target=es2019 ./src/index.jsx --bundle --platform=node --outfile=index.js",
     "prepare": "husky install",

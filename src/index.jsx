@@ -46,37 +46,39 @@ const main = async () => {
 
   let doesBranchExist = true
 
-  if (branch) {
-    await exec('git', ['fetch'])
-
-    try {
-      await exec('git', ['rev-parse', '--verify', branch])
-      await exec('git', ['checkout', branch])
-    } catch {
-      doesBranchExist = false
-      core.info(`Branch ${branch} does not yet exist, creating ${branch}.`)
-      await exec('git', ['checkout', '-b', branch])
+  if(commitDiagram) {
+    if (branch) {
+      await exec('git', ['fetch'])
+  
+      try {
+        await exec('git', ['rev-parse', '--verify', branch])
+        await exec('git', ['checkout', branch])
+      } catch {
+        doesBranchExist = false
+        core.info(`Branch ${branch} does not yet exist, creating ${branch}.`)
+        await exec('git', ['checkout', '-b', branch])
+      }
     }
-  }
-
-  await exec('git', ['add', outputFile])
-  const diff = await execWithOutput('git', ['status', '--porcelain', outputFile])
-  core.info(`diff: ${diff}`)
-  if (!diff) {
-    core.info('[INFO] No changes to the repo detected, exiting')
-    return
-  }
-
-  await exec('git', ['commit', '-m', commitMessage])
-
-  if (doesBranchExist) {
-    await exec('git', ['push'])
-  } else {
-    await exec('git', ['push', '--set-upstream', 'origin', branch])
-  }
-
-  if (branch) {
-    await exec('git', 'checkout', '-')
+  
+    await exec('git', ['add', outputFile])
+    const diff = await execWithOutput('git', ['status', '--porcelain', outputFile])
+    core.info(`diff: ${diff}`)
+    if (!diff) {
+      core.info('[INFO] No changes to the repo detected, exiting')
+      return
+    }
+  
+    await exec('git', ['commit', '-m', commitMessage])
+  
+    if (doesBranchExist) {
+      await exec('git', ['push'])
+    } else {
+      await exec('git', ['push', '--set-upstream', 'origin', branch])
+    }
+  
+    if (branch) {
+      await exec('git', 'checkout', '-')
+    }
   }
 
   console.log("All set!")
